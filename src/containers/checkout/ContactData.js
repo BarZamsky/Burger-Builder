@@ -6,6 +6,7 @@ import Spinner from "../../components/UI/Spinner/Spinner"
 import Input from "../../components/UI/Input/Input"
 import withErrorHandler from "../../hoc/withErrorHandler/WithErrorHandler"
 import * as actions from "../../store/actions/index"
+import {updateObject} from "../../shared/utility";
 
 import classes from "./ContactData.css"
 
@@ -93,6 +94,7 @@ class ContactData extends Component{
                     ]
                 },
                 value: 'fastest',
+                validation: {},
                 valid: true
             }
         },
@@ -109,10 +111,11 @@ class ContactData extends Component{
         let order = {
             ingredients: this.props.ings,
             price: this.props.price,
-            orderData: formData
+            orderData: formData,
+            userId: this.props.userId
         }
 
-        this.props.onOrderBurger(order);
+        this.props.onOrderBurger(order, this.props.token);
     }
 
     checkValidity = (value, rules) => {
@@ -138,16 +141,17 @@ class ContactData extends Component{
     }
 
     onChangeHandler = (e, inputKey) => {
-        const updated = {
-            ...this.state.orderForm
-        }
 
-        const elem = {...updated[inputKey]}
-        elem.value = e.target.value
-        if (elem.validation)
-            elem.valid = this.checkValidity(elem.value, elem.validation)
-        elem.touched = true
-        updated[inputKey] = elem
+
+        const elem = updateObject(this.state.orderForm[inputKey], {
+            value: e.target.value,
+            valid: this.checkValidity(e.target.value, this.state.orderForm[inputKey].validation),
+            touched: true
+        })
+
+        const updated = updateObject(this.state.orderForm, {
+            [inputKey]: elem
+        })
 
         let formIsValid = true
         for (let key in updated) {
@@ -195,13 +199,15 @@ const mapStateToProps = state => {
     return {
         ings: state.burgerBuilder.ingredients,
         price: state.burgerBuilder.totalPrice,
-        loading: state.order.loading
+        loading: state.order.loading,
+        token: state.auth.token,
+        userId: state.auth.userId
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        onOrderBurger: (orderData) => dispatch(actions.purchaseBurger(orderData))
+        onOrderBurger: (orderData, token) => dispatch(actions.purchaseBurger(orderData, token))
     }
 }
 
