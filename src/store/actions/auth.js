@@ -1,6 +1,7 @@
 import * as actionTypes from "./actionTypes"
 import axios from "axios"
-import * as config from "../config/config"
+
+const API_KEY = "AIzaSyAeyc_lSnbaYUFRpdjNaYTl_1GZ3bYTNvg"
 
 export const authStart = () => {
     return {
@@ -48,9 +49,9 @@ export const auth = (email, password, isSignup) => {
             password: password,
             returnSecuredToken: true
         }
-        let url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="+config.API_KEY
+        let url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="+API_KEY
         if (!isSignup)
-            url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="+config.API_KEY
+            url = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="+API_KEY
         axios.post(url, authData)
             .then(res => {
                 const expirationDate = new Date(new Date().getTime() + 3600*1000)
